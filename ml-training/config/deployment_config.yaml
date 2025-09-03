@@ -1,0 +1,32 @@
+deployment:
+  base_dir: "../../data/model_deployment"
+  max_concurrent_deployments: 5
+  deployment_timeout_minutes: 30
+  heartbeat_interval_seconds: 60
+  performance_monitoring_interval_minutes: 15
+  auto_rollback_on_failure: true
+  require_device_authentication: true
+
+security:
+  use_tls: true
+  verify_model_signatures: true
+  encrypt_model_transfer: true
+  api_key_length: 32
+
+versioning:
+  max_versions_per_device: 3
+  cleanup_old_versions: true
+  version_retention_days: 30
+
+monitoring:
+  performance_degradation_threshold: 0.1
+  error_rate_threshold: 0.05
+  latency_threshold_ms: 1000
+  memory_usage_threshold: 0.8
+
+scheduling:
+  enable_auto_updates: true
+  update_window_start: "02:00"
+  update_window_end: "04:00"
+  batch_size: 3
+  rollout_strategy: "canary"  # canary, blue_green, rolling

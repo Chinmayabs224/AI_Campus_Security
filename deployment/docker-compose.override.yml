@@ -1,0 +1,128 @@
+# Docker Compose Override for Development
+# This file provides development-specific configurations
+
+version: '3.8'
+
+services:
+  core-api:
+    build:
+      context: ./core-api
+      dockerfile: Dockerfile
+      target: builder  # Use builder stage for development
+    volumes:
+      - ./core-api:/app
+      - /app/__pycache__
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  privacy-service:
+    build:
+      context: ./microservices/privacy-service
+      dockerfile: Dockerfile
+      target: builder
+    volumes:
+      - ./microservices/privacy-service:/app
+      - /app/__pycache__
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+    command: python app.py
+
+  notification-service:
+    build:
+      context: ./microservices/notification-service
+      dockerfile: Dockerfile
+      target: builder
+    volumes:
+      - ./microservices/notification-service:/app
+      - /app/__pycache__
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+    command: python app.py
+
+  compliance-service:
+    build:
+      context: ./microservices/compliance-service
+      dockerfile: Dockerfile
+      target: builder
+    volumes:
+      - ./microservices/compliance-service:/app
+      - /app/__pycache__
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+    command: python app.py
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: builder
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api/v1
+      - REACT_APP_WS_URL=ws://localhost:8000/ws
+      - CHOKIDAR_USEPOLLING=true
+    command: npm start
+    ports:
+      - "3000:3000"
+
+  edge-service:
+    build:
+      context: ./edge-services
+      dockerfile: Dockerfile
+      target: builder
+    volumes:
+      - ./edge-services:/app
+      - /app/__pycache__
+    environment:
+      - GPU_ENABLED=false  # Disable GPU for development
+      - DEBUG=true
+    command: python main.py
+
+  # Development tools
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: campus-security-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - campus-security
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: campus-security-redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - campus-security
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: campus-security-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@campus-security.local
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - campus-security
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+volumes:
+  pgadmin_data:

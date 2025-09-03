@@ -1,0 +1,32 @@
+drift_detection:
+  output_dir: "../../data/drift_detection"
+  monitoring_interval_hours: 6
+  baseline_window_days: 7
+  detection_window_days: 1
+  min_samples_for_detection: 100
+  enable_statistical_tests: true
+  enable_visualization: true
+
+thresholds:
+  performance_drift:
+    accuracy_threshold: 0.05
+    precision_threshold: 0.05
+    recall_threshold: 0.05
+    latency_threshold: 0.2
+  
+  statistical_drift:
+    psi_threshold: 0.2
+    kl_divergence_threshold: 0.1
+    js_divergence_threshold: 0.1
+  
+  severity_levels:
+    low: 0.05
+    medium: 0.1
+    high: 0.2
+    critical: 0.3
+
+alerts:
+  enable_notifications: true
+  notification_channels: ["email", "webhook"]
+  escalation_hours: 24
+  auto_trigger_retraining: false

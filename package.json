@@ -1,0 +1,31 @@
+{
+  "name": "ai-campus-security",
+  "version": "1.0.0",
+  "description": "AI-Powered Campus Security System",
+  "scripts": {
+    "setup": "python setup-dev.py",
+    "dev": "docker-compose up -d && cd frontend && npm start",
+    "start": "docker-compose up -d",
+    "stop": "docker-compose down",
+    "logs": "docker-compose logs -f",
+    "clean": "docker-compose down -v && docker system prune -f",
+    "frontend": "cd frontend && npm start",
+    "frontend:build": "cd frontend && npm run build",
+    "test": "cd frontend && npm test"
+  },
+  "keywords": [
+    "security",
+    "ai",
+    "campus",
+    "surveillance",
+    "yolo",
+    "edge-computing"
+  ],
+  "author": "Campus Security Team",
+  "license": "MIT",
+  "devDependencies": {},
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

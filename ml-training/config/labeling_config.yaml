@@ -1,0 +1,36 @@
+# Automated Labeling Configuration
+
+labeling:
+  output_dir: "../../data/labeling"
+  confidence_threshold: 0.25
+  nms_threshold: 0.45
+  ensemble_agreement_threshold: 0.6
+  temporal_consistency_frames: 5
+  clustering_eps: 0.3
+  min_samples: 3
+
+classes:
+  0: "person"
+  1: "suspicious_activity"
+  2: "violence"
+  3: "theft"
+  4: "abandoned_object"
+  5: "crowding"
+  6: "loitering"
+
+security_priority_classes: [1, 2, 3, 4]
+
+models:
+  primary_model: "../models/best_security_model.pt"
+  ensemble_models: []
+
+validation:
+  require_human_validation: true
+  auto_approve_threshold: 0.9
+  batch_size: 50
+
+# Quality control settings
+quality_control:
+  min_confidence_for_auto_approval: 0.85
+  require_human_validation_for_security_classes: true
+  max_auto_approval_rate: 0.8

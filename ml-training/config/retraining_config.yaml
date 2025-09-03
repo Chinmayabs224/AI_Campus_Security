@@ -1,0 +1,64 @@
+# Model Retraining Configuration
+
+retraining:
+  output_dir: "../../data/retraining_pipeline"
+  trigger_conditions:
+    min_new_samples: 100
+    performance_degradation_threshold: 0.05
+    false_positive_rate_threshold: 0.15
+    days_since_last_training: 30
+  data_collection_window_days: 14
+  min_samples_per_class: 20
+  validation_split: 0.2
+
+data_collection:
+  output_dir: "../../data/retraining"
+  min_confidence_threshold: 0.3
+  max_confidence_threshold: 0.9
+  collection_window_days: 7
+  max_samples_per_class: 1000
+  frame_extraction_interval: 30
+
+quality_filters:
+  min_resolution: [320, 240]
+  max_blur_threshold: 100
+  min_brightness: 20
+  max_brightness: 235
+
+validation:
+  performance_thresholds:
+    min_mAP50_improvement: 0.02
+    max_performance_degradation: 0.01
+    min_security_score: 0.7
+    max_false_positive_rate: 0.1
+  validation_dataset_path: "../../data/validation"
+  benchmark_models: []
+
+training:
+  epochs: 50
+  patience: 10
+  model_sizes: ["n", "s"]
+  use_transfer_learning: true
+
+deployment:
+  require_manual_approval: true
+  backup_current_model: true
+  rollback_on_failure: true
+
+database:
+  host: "localhost"
+  port: 5432
+  database: "campus_security"
+  table: "incidents"
+
+# Classes for security detection
+classes:
+  0: "person"
+  1: "suspicious_activity"
+  2: "violence"
+  3: "theft"
+  4: "abandoned_object"
+  5: "crowding"
+  6: "loitering"
+
+security_priority_classes: [1, 2, 3, 4]

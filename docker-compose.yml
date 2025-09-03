@@ -1,0 +1,132 @@
+version: '3.8'
+
+services:
+  # Database Services
+  postgres:
+    image: postgres:15
+    container_name: campus-security-db
+    environment:
+      POSTGRES_DB: campus_security
+      POSTGRES_USER: security_user
+      POSTGRES_PASSWORD: security_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - campus-security
+
+  # Object Storage (S3-compatible)
+  minio:
+    image: minio/minio:latest
+    container_name: campus-security-storage
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    networks:
+      - campus-security
+
+  # Cache and Session Store
+  redis:
+    image: redis:7-alpine
+    container_name: campus-security-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - campus-security
+
+  # Core API Service
+  core-api:
+    build:
+      context: ./core-api
+      dockerfile: Dockerfile
+    container_name: campus-security-api
+    environment:
+      DATABASE_URL: postgresql://security_user:security_pass@postgres:5432/campus_security
+      REDIS_URL: redis://redis:6379
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin123
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    networks:
+      - campus-security
+    volumes:
+      - ./core-api:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Privacy Microservice
+  privacy-service:
+    build:
+      context: ./microservices/privacy-service
+      dockerfile: Dockerfile
+    container_name: campus-security-privacy
+    environment:
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "5001:5000"
+    depends_on:
+      - redis
+    networks:
+      - campus-security
+    volumes:
+      - ./microservices/privacy-service:/app
+
+  # Notification Microservice
+  notification-service:
+    build:
+      context: ./microservices/notification-service
+      dockerfile: Dockerfile
+    container_name: campus-security-notifications
+    environment:
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "5002:5000"
+    depends_on:
+      - redis
+    networks:
+      - campus-security
+    volumes:
+      - ./microservices/notification-service:/app
+
+  # Edge Inference Service (for development)
+  edge-service:
+    build:
+      context: ./edge-services
+      dockerfile: Dockerfile
+    container_name: campus-security-edge
+    environment:
+      CORE_API_URL: http://core-api:8000
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "8001:8001"
+    depends_on:
+      - core-api
+      - redis
+    networks:
+      - campus-security
+    volumes:
+      - ./edge-services:/app
+      - ./models:/app/models
+
+volumes:
+  postgres_data:
+  minio_data:
+  redis_data:
+
+networks:
+  campus-security:
+    driver: bridge

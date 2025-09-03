@@ -1,0 +1,47 @@
+# A/B Testing Configuration
+
+ab_testing:
+  output_dir: "../../data/ab_testing"
+  default_duration_hours: 72
+  min_sample_size: 1000
+  confidence_level: 0.95
+  statistical_power: 0.8
+
+deployment:
+  edge_nodes: 
+    - "edge_node_1"
+    - "edge_node_2" 
+    - "edge_node_3"
+    - "edge_node_4"
+    - "edge_node_5"
+  rollback_timeout_minutes: 30
+  health_check_interval_seconds: 60
+
+success_criteria:
+  min_detection_rate_improvement: 0.02
+  max_false_positive_increase: 0.01
+  max_inference_time_increase_ms: 50
+  min_confidence_improvement: 0.05
+
+rollback_criteria:
+  max_error_rate: 0.05
+  max_false_positive_rate: 0.15
+  max_inference_time_ms: 500
+  min_detection_rate: 0.7
+
+# Deployment strategies
+strategies:
+  canary:
+    initial_traffic_split: 0.1
+    max_traffic_split: 0.5
+  
+  blue_green:
+    switch_threshold: 0.95
+    
+  gradual_rollout:
+    initial_split: 0.05
+    increment: 0.1
+    interval_hours: 6
+    
+  shadow_testing:
+    duration_hours: 48

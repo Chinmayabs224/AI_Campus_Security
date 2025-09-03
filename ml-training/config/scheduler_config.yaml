@@ -1,0 +1,48 @@
+# Retraining Scheduler Configuration
+
+scheduler:
+  check_interval_hours: 6
+  max_concurrent_jobs: 2
+  enable_auto_deployment: false
+  notification_webhook: null
+  backup_retention_days: 30
+
+# Notification settings
+notifications:
+  email:
+    enabled: false
+    smtp_server: "smtp.example.com"
+    smtp_port: 587
+    username: "alerts@example.com"
+    recipients: ["admin@example.com"]
+  
+  webhook:
+    enabled: false
+    url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+    
+  dashboard:
+    enabled: true
+    update_interval_seconds: 30
+
+# Monitoring settings
+monitoring:
+  job_timeout_hours: 24
+  health_check_interval_minutes: 5
+  performance_alert_thresholds:
+    detection_rate_drop: 0.05
+    false_positive_increase: 0.03
+    inference_time_increase_ms: 100
+
+# Cleanup settings
+cleanup:
+  model_retention_days: 30
+  log_retention_days: 30
+  temp_file_retention_days: 7
+  report_retention_days: 90
+
+# Performance review settings
+performance_review:
+  weekly_enabled: true
+  monthly_enabled: true
+  generate_recommendations: true
+  auto_trigger_retraining: false

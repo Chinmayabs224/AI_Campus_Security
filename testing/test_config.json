@@ -1,0 +1,86 @@
+{
+  "test_environment": {
+    "base_url": "http://localhost:8000",
+    "database_url": "postgresql://test_user:test_pass@localhost:5432/campus_security_test",
+    "redis_url": "redis://localhost:6379/1",
+    "minio_endpoint": "localhost:9000",
+    "minio_access_key": "minioadmin",
+    "minio_secret_key": "minioadmin"
+  },
+  "performance_thresholds": {
+    "alert_latency_max": 5.0,
+    "detection_accuracy_min": 0.7,
+    "false_positive_rate_max": 0.3,
+    "api_response_time_max": 1.0,
+    "concurrent_streams_min": 10,
+    "storage_write_time_max": 2.0,
+    "memory_usage_max_mb": 500,
+    "cpu_usage_max_percent": 80
+  },
+  "compliance_requirements": {
+    "gdpr": {
+      "data_retention_days": 365,
+      "dsar_response_days": 30,
+      "audit_log_retention_years": 7,
+      "encryption_required": true,
+      "anonymization_required": true
+    },
+    "ferpa": {
+      "access_logging_required": true,
+      "consent_tracking_required": true,
+      "data_minimization_required": true,
+      "secure_transmission_required": true
+    },
+    "coppa": {
+      "parental_consent_required": true,
+      "data_collection_limited": true,
+      "deletion_on_request": true
+    }
+  },
+  "security_requirements": {
+    "authentication": {
+      "jwt_expiry_hours": 24,
+      "password_min_length": 8,
+      "mfa_required": false,
+      "session_timeout_minutes": 30
+    },
+    "authorization": {
+      "rbac_enabled": true,
+      "api_rate_limiting": true,
+      "audit_logging": true
+    },
+    "encryption": {
+      "data_at_rest": true,
+      "data_in_transit": true,
+      "key_rotation_days": 90
+    }
+  },
+  "load_testing": {
+    "concurrent_users": 50,
+    "test_duration_seconds": 300,
+    "ramp_up_time_seconds": 60,
+    "think_time_min_seconds": 0.5,
+    "think_time_max_seconds": 2.0
+  },
+  "camera_simulation": {
+    "num_cameras": 20,
+    "fps": 30,
+    "resolution": "640x480",
+    "stream_duration_seconds": 60,
+    "event_probability": 0.1
+  },
+  "test_execution": {
+    "parallel": true,
+    "workers": 4,
+    "timeout_seconds": 1800,
+    "retry_attempts": 3,
+    "cleanup_after_tests": true
+  },
+  "reporting": {
+    "generate_html_report": true,
+    "include_screenshots": false,
+    "include_performance_graphs": true,
+    "email_results": false,
+    "slack_notifications": false
+  }
+}

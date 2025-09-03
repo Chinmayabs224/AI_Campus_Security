@@ -1,0 +1,138 @@
+# Falco configuration for campus security system runtime monitoring
+
+# File(s) or Directories containing Falco rules, loaded at startup.
+rules_file:
+  - /etc/falco/falco_rules.yaml
+  - /etc/falco/falco_rules.local.yaml
+  - /etc/falco/k8s_audit_rules.yaml
+  - /etc/falco/rules.d
+
+# Whether to output events in json or text
+json_output: true
+
+# Whether to include the "output_fields" and "tags" fields in rules output
+json_include_output_property: true
+json_include_tags_property: true
+
+# Send information logs to stderr and/or syslog Note these are *not* security
+# notification logs! These are just Falco lifecycle (and possibly error) logs.
+log_stderr: true
+log_syslog: false
+
+# Minimum log level to include in logs. Note: these levels are
+# separate from the priority field of rules. This refers only to the
+# log level of falco's internal logging. Can be one of "emergency", "alert",
+# "critical", "error", "warning", "notice", "info", "debug".
+log_level: info
+
+# Minimum rule priority level to load and run. All rules having a
+# priority more severe than this level will be loaded/run.  Can be one
+# of "emergency", "alert", "critical", "error", "warning", "notice",
+# "info", "debug".
+priority: debug
+
+# Whether or not output to any of the output channels below is
+# buffered. Defaults to false
+buffered_outputs: false
+
+# Falco uses a shared buffer between the kernel and userspace to pass
+# system call information. When Falco detects that this buffer is
+# full and system calls have been dropped, it can take one or more of
+# the following actions:
+#   - ignore: do nothing (default when list of actions is empty)
+#   - log: log a DEBUG message noting that the buffer was full
+#   - alert: emit a Falco alert noting that the buffer was full
+#   - exit: exit Falco with a non-zero rc
+syscall_event_drops:
+  actions:
+    - log
+    - alert
+  rate: 0.03333  # 1 every 30 seconds
+  max_burst: 1
+
+# Falco continuously monitors outputs performance. When an output channel does
+# not allow to deliver an alert within a given deadline, an error is reported
+# indicating which output is blocking notifications.
+output_timeout: 2000
+
+# A throttling mechanism implemented as a token bucket limits the
+# rate of falco notifications. This throttling is controlled by the following configuration
+# options:
+#  - rate: the number of tokens (i.e. right to send a notification)
+#    gained per second. Defaults to 1.
+#  - max_burst: the maximum number of tokens outstanding. Defaults to 1000.
+outputs:
+  rate: 1
+  max_burst: 1000
+
+# Where security notifications are sent.
+# Multiple outputs can be enabled.
+
+syslog_output:
+  enabled: false
+
+# If keep_alive is set to true, the file will be opened once and
+# continuously written to, with each output message on its own
+# line. If keep_alive is set to false, the file will be re-opened
+# for each output message.
+file_output:
+  enabled: true
+  keep_alive: false
+  filename: /var/log/falco_events.txt
+
+stdout_output:
+  enabled: true
+
+# Falco contains an embedded webserver that can be used to accept K8s
+# Audit Log events. The configuration section below defines the
+# behavior of this embedded webserver.
+webserver:
+  enabled: false
+  listen_port: 8765
+  k8s_audit_endpoint: /k8s-audit
+  ssl_enabled: false
+  ssl_certificate: /etc/falco/falco.pem
+
+# Possible additional things you might want to do with program output:
+#   - send to a slack webhook:
+#         program: "jq '{text: .output}' | curl -d @- -X POST https://hooks.slack.com/services/XXX"
+#   - logging (alternate method than syslog):
+#         program: logger -t falco-test
+#   - send over a network connection:
+#         program: nc host.example.com 80
+
+# If keep_alive is set to true, the program will be started once and
+# continuously written to, with each output message on its own
+# line. If keep_alive is set to false, the program will be re-spawned
+# for each output message.
+program_output:
+  enabled: false
+  keep_alive: false
+  program: "curl -X POST http://security-monitor:8080/falco-alerts -H 'Content-Type: application/json' -d @-"
+
+http_output:
+  enabled: true
+  url: "http://security-monitor:8080/falco-alerts"
+  user_agent: "falco/campus-security"
+
+# gRPC server configuration.
+# The gRPC server is secure by default (mutual TLS) so you need to generate certificates and update their paths here.
+# By default the gRPC server is off.
+grpc:
+  enabled: false
+  bind_address: "0.0.0.0:5060"
+  threadiness: 0
+
+# gRPC output service.
+# By default it is off.
+grpc_output:
+  enabled: false
+
+# Container orchestrator metadata fetching params
+metadata_download:
+  max_mb: 100
+  chunk_wait_us: 1000
+  watch_freq_sec: 1
+
+# Campus security specific rules
+load_plugins: []

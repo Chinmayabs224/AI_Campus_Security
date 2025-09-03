@@ -1,0 +1,42 @@
+scheduler:
+  output_dir: "../../data/update_scheduler"
+  check_interval_minutes: 5
+  max_concurrent_updates: 10
+  default_update_window_start: "02:00"
+  default_update_window_end: "04:00"
+  enable_maintenance_windows: true
+
+rollout_strategies:
+  canary:
+    canary_percentage: 0.1
+    canary_duration_minutes: 30
+    success_threshold: 0.95
+  
+  blue_green:
+    validation_duration_minutes: 15
+    traffic_switch_delay_minutes: 5
+  
+  rolling:
+    batch_size: 3
+    batch_delay_minutes: 15
+    max_unavailable_percentage: 0.2
+
+health_monitoring:
+  health_check_interval_minutes: 5
+  health_check_timeout_seconds: 30
+  failure_threshold: 3
+  recovery_threshold: 2
+
+rollback:
+  auto_rollback_enabled: true
+  rollback_trigger_failure_rate: 0.2
+  rollback_timeout_minutes: 10
+  preserve_rollback_data_days: 7
+
+notifications:
+  enable_notifications: true
+  notification_channels: ["email", "slack", "webhook"]
+  notify_on_start: true
+  notify_on_completion: true
+  notify_on_failure: true
+  notify_on_rollback: true

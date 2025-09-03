@@ -1,0 +1,65 @@
+{
+  "service_name": "edge-event-generator",
+  "log_level": "INFO",
+  "enable_clip_extraction": true,
+  "enable_local_buffering": true,
+  "auto_cleanup_interval": 3600,
+  "central_api_url": "https://api.campus-security.local",
+  "api_timeout": 30,
+  "api_retry_attempts": 3,
+  
+  "event_config": {
+    "min_confidence": 0.5,
+    "high_confidence": 0.8,
+    "critical_confidence": 0.9,
+    "dedup_time_window": 10.0,
+    "dedup_spatial_threshold": 0.3,
+    "aggregation_window": 5.0,
+    "min_detections_for_event": 2,
+    "class_to_event_type": {
+      "person": "intrusion",
+      "car": "suspicious_activity",
+      "truck": "suspicious_activity",
+      "motorcycle": "suspicious_activity",
+      "bicycle": "suspicious_activity",
+      "handbag": "abandoned_object",
+      "suitcase": "abandoned_object",
+      "backpack": "abandoned_object"
+    },
+    "confidence_to_severity": [
+      [0.9, "critical"],
+      [0.8, "high"],
+      [0.6, "medium"],
+      [0.0, "low"]
+    ]
+  },
+  
+  "clip_config": {
+    "pre_event_duration": 10.0,
+    "post_event_duration": 15.0,
+    "max_clip_duration": 60.0,
+    "output_fps": 15.0,
+    "output_resolution": [640, 480],
+    "video_codec": "mp4v",
+    "video_quality": 80,
+    "clips_directory": "clips",
+    "max_clips_per_camera": 100,
+    "max_storage_gb": 10.0,
+    "frame_buffer_size": 900,
+    "frame_buffer_memory_limit": 524288000
+  },
+  
+  "buffer_config": {
+    "buffer_directory": "local_buffer",
+    "max_buffer_size_mb": 1000,
+    "max_events_per_buffer": 1000,
+    "max_buffer_age_hours": 48,
+    "db_file": "events_buffer.db",
+    "enable_compression": true,
+    "sync_batch_size": 50,
+    "sync_retry_interval": 30,
+    "max_sync_retries": 10,
+    "network_check_interval": 10,
+    "network_timeout": 5
+  }
+}

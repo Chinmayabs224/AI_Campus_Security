@@ -1,0 +1,271 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: campus-security-notification-service
+  labels:
+    app: campus-security-notification-service
+    component: microservice
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: campus-security-notification-service
+  template:
+    metadata:
+      labels:
+        app: campus-security-notification-service
+        component: microservice
+    spec:
+      containers:
+      - name: notification-service
+        image: campus-security/notification-service:latest
+        ports:
+        - containerPort: 5001
+        env:
+        - name: FLASK_ENV
+          value: "production"
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: url
+        - name: TWILIO_ACCOUNT_SID
+          valueFrom:
+            secretKeyRef:
+              name: twilio-secret
+              key: account_sid
+        - name: TWILIO_AUTH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: twilio-secret
+              key: auth_token
+        - name: FCM_SERVER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: fcm-secret
+              key: server_key
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5001
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5001
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: campus-security-privacy-service
+  labels:
+    app: campus-security-privacy-service
+    component: microservice
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: campus-security-privacy-service
+  template:
+    metadata:
+      labels:
+        app: campus-security-privacy-service
+        component: microservice
+    spec:
+      containers:
+      - name: privacy-service
+        image: campus-security/privacy-service:latest
+        ports:
+        - containerPort: 5002
+        env:
+        - name: FLASK_ENV
+          value: "production"
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: url
+        - name: MINIO_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: endpoint
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: access_key
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-secret
+              key: secret_key
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5002
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5002
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: campus-security-compliance-service
+  labels:
+    app: campus-security-compliance-service
+    component: microservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: campus-security-compliance-service
+  template:
+    metadata:
+      labels:
+        app: campus-security-compliance-service
+        component: microservice
+    spec:
+      containers:
+      - name: compliance-service
+        image: campus-security/compliance-service:latest
+        ports:
+        - containerPort: 5003
+        env:
+        - name: FLASK_ENV
+          value: "production"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: database-secret
+              key: url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: redis-secret
+              key: url
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5003
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5003
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: campus-security-notification-service
+spec:
+  selector:
+    app: campus-security-notification-service
+  ports:
+  - port: 80
+    targetPort: 5001
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: campus-security-privacy-service
+spec:
+  selector:
+    app: campus-security-privacy-service
+  ports:
+  - port: 80
+    targetPort: 5002
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: campus-security-compliance-service
+spec:
+  selector:
+    app: campus-security-compliance-service
+  ports:
+  - port: 80
+    targetPort: 5003
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: notification-service-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: campus-security-notification-service
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: privacy-service-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: campus-security-privacy-service
+  minReplicas: 2
+  maxReplicas: 8
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

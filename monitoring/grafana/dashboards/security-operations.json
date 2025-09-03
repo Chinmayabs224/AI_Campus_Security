@@ -1,0 +1,169 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Security Operations Dashboard",
+    "tags": ["security", "operations", "incidents"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Active Security Incidents",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(security_incidents_total[5m]))",
+            "legendFormat": "Incidents/sec"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 0.1},
+                {"color": "red", "value": 0.5}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "False Positive Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "security_false_positive_rate",
+            "legendFormat": "False Positive Rate"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 1,
+            "unit": "percentunit",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 0.1},
+                {"color": "red", "value": 0.3}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Incident Processing Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(security_incident_processing_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          },
+          {
+            "expr": "histogram_quantile(0.50, rate(security_incident_processing_duration_seconds_bucket[5m]))",
+            "legendFormat": "50th percentile"
+          }
+        ],
+        "yAxes": [{"unit": "s"}],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Edge Node Status",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "up{job=\"edge-services\"}",
+            "legendFormat": "{{instance}}"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "instance": "Edge Node",
+                "Value": "Status"
+              }
+            }
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Camera Stream Health",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "edge_camera_streams_active",
+            "legendFormat": "{{edge_node_id}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 6,
+        "title": "AI Model Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(ai_model_inference_time_seconds_bucket[5m]))",
+            "legendFormat": "{{model_type}} - 95th percentile"
+          }
+        ],
+        "yAxes": [{"unit": "s"}],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "Evidence Storage Status",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(evidence_storage_errors_total[5m])",
+            "legendFormat": "Storage Errors/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 8,
+        "title": "Alert Delivery Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(alert_delivery_time_seconds_bucket[5m]))",
+            "legendFormat": "{{delivery_method}} - 95th percentile"
+          }
+        ],
+        "yAxes": [{"unit": "s"}],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 9,
+        "title": "Privacy Redaction Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(privacy_redaction_time_seconds_bucket[5m]))",
+            "legendFormat": "{{redaction_type}} - 95th percentile"
+          }
+        ],
+        "yAxes": [{"unit": "s"}],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      }
+    ],
+    "time": {"from": "now-1h", "to": "now"},
+    "refresh": "5s"
+  }
+}

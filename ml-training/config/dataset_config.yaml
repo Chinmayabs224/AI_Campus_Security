@@ -1,0 +1,98 @@
+# UCF Crime Dataset Configuration for Campus Security
+
+dataset:
+  name: "ucf-crime-campus-security"
+  source: "odins0n/ucf-crime-dataset"
+  version: "latest"
+  
+  # Local paths
+  raw_data_dir: "../../data/raw/ucf-crime"
+  processed_data_dir: "../../data/processed/ucf-crime"
+  yolo_data_dir: "../../data/processed/ucf-crime/yolo_format"
+
+# Security-focused class mapping
+classes:
+  normal: 0           # Normal campus activity
+  suspicious: 1       # Suspicious behavior patterns
+  violence: 2         # Physical altercations, fights
+  theft: 3           # Stealing, pickpocketing
+  vandalism: 4       # Property damage, graffiti
+  trespassing: 5     # Unauthorized area access
+  crowd: 6           # Large gatherings, protests
+  abandoned_object: 7 # Unattended bags, packages
+  loitering: 8       # Prolonged presence in restricted areas
+  emergency: 9       # Medical emergencies, accidents
+
+# Frame extraction settings
+frame_extraction:
+  max_frames_per_video: 100
+  frame_interval_strategy: "uniform"  # uniform, random, keyframe
+  output_format: "jpg"
+  output_quality: 95
+  resize_dimensions: [640, 640]  # YOLO input size
+
+# Dataset splits
+splits:
+  train: 0.7
+  validation: 0.2
+  test: 0.1
+  
+# Data augmentation for training
+augmentation:
+  enabled: true
+  techniques:
+    - horizontal_flip: 0.5
+    - rotation: 15
+    - brightness: 0.2
+    - contrast: 0.2
+    - saturation: 0.2
+    - hue: 0.1
+    - noise: 0.1
+
+# YOLO training configuration
+yolo:
+  model_size: "yolov8n"  # n, s, m, l, x
+  input_size: 640
+  batch_size: 16
+  epochs: 100
+  learning_rate: 0.01
+  patience: 50
+  
+# Campus-specific detection parameters
+detection:
+  confidence_threshold: 0.5
+  nms_threshold: 0.4
+  max_detections: 100
+  
+  # Campus environment considerations
+  lighting_conditions:
+    - daylight
+    - artificial_lighting
+    - low_light
+    - night_vision
+    
+  weather_conditions:
+    - clear
+    - rain
+    - snow
+    - fog
+    
+  camera_angles:
+    - overhead
+    - eye_level
+    - elevated
+    - ground_level
+
+# Privacy and compliance
+privacy:
+  face_detection_required: true
+  auto_redaction: true
+  retention_policy_days: 90
+  anonymization_level: "high"
+  
+# Performance benchmarks
+benchmarks:
+  target_fps: 30
+  max_inference_time_ms: 100
+  memory_limit_mb: 2048
+  accuracy_threshold: 0.85

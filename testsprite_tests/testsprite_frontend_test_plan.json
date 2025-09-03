@@ -1,0 +1,586 @@
+[
+  {
+    "id": "TC001",
+    "title": "User Registration with Valid Data",
+    "description": "Verify that a new user can register successfully with valid information and receives an email verification link.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the registration page"
+      },
+      {
+        "type": "action",
+        "description": "Enter valid user details including email, password, and required personal information"
+      },
+      {
+        "type": "action",
+        "description": "Submit the registration form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify registration success message is displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm email verification link is sent to the user's email"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "User Registration with Invalid Email Format",
+    "description": "Verify that registration fails when the user provides an invalid email format.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the registration page"
+      },
+      {
+        "type": "action",
+        "description": "Enter user details with improperly formatted email"
+      },
+      {
+        "type": "action",
+        "description": "Submit the registration form"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that error message about invalid email format is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Multi-factor Authentication Enforcement",
+    "description": "Verify that multi-factor authentication (MFA) is required and enforced on user login.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to login with valid username and password"
+      },
+      {
+        "type": "assertion",
+        "description": "System prompts for MFA verification"
+      },
+      {
+        "type": "action",
+        "description": "Provide valid MFA token"
+      },
+      {
+        "type": "assertion",
+        "description": "Login successful and user is redirected to dashboard"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Login Failure with Incorrect Password",
+    "description": "Verify login attempt is rejected with incorrect password and appropriate error message is shown.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to login page"
+      },
+      {
+        "type": "action",
+        "description": "Enter valid username and incorrect password"
+      },
+      {
+        "type": "action",
+        "description": "Submit login form"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify authentication failed message is displayed"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Role-Based Access Control Verification for Student",
+    "description": "Verify that a user with the Student role can access only student-related features and interfaces.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login with Student user account"
+      },
+      {
+        "type": "assertion",
+        "description": "Access to course enrollment dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Access to assignment submission page"
+      },
+      {
+        "type": "assertion",
+        "description": "Access to personal gradebook"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access administrative settings page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access denied or not authorized error"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Course Creation and Enrollment by Teacher and Student",
+    "description": "Verify that teachers can create courses with rich media content and students can self-enroll in available courses.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as Teacher"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to course creation page"
+      },
+      {
+        "type": "action",
+        "description": "Create a course with text, video, and document uploads"
+      },
+      {
+        "type": "assertion",
+        "description": "Course is created and visible in teacher's course list"
+      },
+      {
+        "type": "action",
+        "description": "Logout and login as Student"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to course catalog"
+      },
+      {
+        "type": "action",
+        "description": "Self-enroll into newly created course"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify student is enrolled and course appears in dashboard"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Assignment Submission and Grading Workflow",
+    "description": "Verify that students can submit assignments, teachers can grade them, and grades are reflected in student progress tracking.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as Teacher and create an assignment with due date"
+      },
+      {
+        "type": "assertion",
+        "description": "Assignment appears in course assignments list"
+      },
+      {
+        "type": "action",
+        "description": "Logout and login as Student enrolled in the course"
+      },
+      {
+        "type": "action",
+        "description": "Submit assignment file before due date"
+      },
+      {
+        "type": "assertion",
+        "description": "Submission confirmation message is shown"
+      },
+      {
+        "type": "action",
+        "description": "Logout and login as Teacher"
+      },
+      {
+        "type": "action",
+        "description": "Open submitted assignments, mark and grade submission"
+      },
+      {
+        "type": "assertion",
+        "description": "Grade is saved and visible to student"
+      },
+      {
+        "type": "action",
+        "description": "Logout and login as Student"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify grade is reflected in assignment and progress reports"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Messaging System and Forum Communication",
+    "description": "Verify that users can send messages, post in discussion forums, and receive system announcements appropriately.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as Teacher"
+      },
+      {
+        "type": "action",
+        "description": "Send a direct message to a student"
+      },
+      {
+        "type": "assertion",
+        "description": "Message is received and visible to student"
+      },
+      {
+        "type": "action",
+        "description": "Create a forum post in a course discussion board"
+      },
+      {
+        "type": "assertion",
+        "description": "Forum post is visible to all course participants"
+      },
+      {
+        "type": "action",
+        "description": "Administrator creates system announcement"
+      },
+      {
+        "type": "assertion",
+        "description": "Announcement is displayed on all user dashboards"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Consent Management and GDPR Compliance Flow",
+    "description": "Verify that users are prompted for privacy consents on data collection and can manage their consents according to GDPR requirements.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Register a new user"
+      },
+      {
+        "type": "assertion",
+        "description": "User is prompted to review and accept privacy policy and data consent forms"
+      },
+      {
+        "type": "action",
+        "description": "Consent acceptance is recorded in audit logs"
+      },
+      {
+        "type": "action",
+        "description": "User visits privacy settings to review and update consent choices"
+      },
+      {
+        "type": "assertion",
+        "description": "Consent changes are saved and audit logged"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "System Response Time Under Normal Load",
+    "description": "Verify that all API calls and UI actions complete within 3 seconds under normal operational load.",
+    "category": "performance",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform typical user actions like login, course enrollment, assignment submission, and messaging"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify response times for each action do not exceed 3 seconds"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "High Availability Failover Test",
+    "description": "Test system availability and data consistency during simulated microservice failure and automated failover.",
+    "category": "reliability",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate failure of a critical microservice such as authentication or course management"
+      },
+      {
+        "type": "assertion",
+        "description": "System automatically fails over and continues to serve user requests with minimal disruption"
+      },
+      {
+        "type": "action",
+        "description": "Perform user login and course data retrieval during failover"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm data consistency and error-free operation"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "API Integration with Third-Party Services",
+    "description": "Verify reliable integration and error handling between EduCore and external services like email providers, cloud storage, video conferencing, and payment gateways.",
+    "category": "integration",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Trigger sending of email notifications"
+      },
+      {
+        "type": "assertion",
+        "description": "Emails are sent successfully and errors are handled gracefully"
+      },
+      {
+        "type": "action",
+        "description": "Upload course content to cloud storage"
+      },
+      {
+        "type": "assertion",
+        "description": "Content uploads succeed and are accessible"
+      },
+      {
+        "type": "action",
+        "description": "Start a video conferencing session from within the platform"
+      },
+      {
+        "type": "assertion",
+        "description": "Conference starts and streams correctly"
+      },
+      {
+        "type": "action",
+        "description": "Execute a payment transaction via integrated payment gateway"
+      },
+      {
+        "type": "assertion",
+        "description": "Payment completes and the transaction is recorded"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Audit Logging and Compliance Tracking",
+    "description": "Verify that all critical user actions and system events are logged appropriately and audit logs meet compliance requirements.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform key actions like login, data updates, consent changes, and role modifications"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that audit logs have entries with user ID, timestamp, and detailed action data"
+      },
+      {
+        "type": "action",
+        "description": "Access audit log reports as Administrator"
+      },
+      {
+        "type": "assertion",
+        "description": "Report exports correctly and includes required compliance information"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Responsive UI on Various Devices and Accessibility Check",
+    "description": "Confirm that the React-based UI is responsive on desktop, tablet, and mobile devices and conforms to WCAG 2.1 AA accessibility standards.",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Access the platform on desktop, tablet, and smartphone screen sizes"
+      },
+      {
+        "type": "assertion",
+        "description": "UI layout adapts appropriately without content overlap or clipping"
+      },
+      {
+        "type": "action",
+        "description": "Run automated accessibility tools and perform manual keyboard navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Validate compliance with WCAG 2.1 AA standards, including color contrast, focus indicators, and screen reader compatibility"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Plagiarism Detection Workflow in Assignment Submissions",
+    "description": "Verify that submitted assignments are scanned for plagiarism and results are presented to teachers before grading.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Submit assignment as student with text content"
+      },
+      {
+        "type": "assertion",
+        "description": "System triggers plagiarism check on submission"
+      },
+      {
+        "type": "action",
+        "description": "Login as teacher and view plagiarism report for submitted assignment"
+      },
+      {
+        "type": "assertion",
+        "description": "Plagiarism results are displayed clearly with similarity scores and highlighted content"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Parent Portal Access and Child Progress Monitoring",
+    "description": "Verify that parents can access their child's attendance, grades, and receive notifications through a dedicated portal.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as Parent user"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify dashboard displays child's courses, attendance records, and latest grades"
+      },
+      {
+        "type": "action",
+        "description": "Trigger a notification related to child's performance or attendance"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm notification appears in parent portal and optionally via email"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Data Encryption In Transit and At Rest",
+    "description": "Verify that sensitive data is encrypted during transmission and when stored, consistent with security policies.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Intercept network traffic during login and data transmission"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm all transmitted data is encrypted using TLS"
+      },
+      {
+        "type": "action",
+        "description": "Access stored user data from database and MinIO storage"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that sensitive fields and files are stored encrypted at rest"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "System Scalability under Increased User Load",
+    "description": "Test system performance and responsiveness when the user base and data volume grow significantly.",
+    "category": "performance",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate concurrent logins, course enrollments, messaging, and content uploads by many users"
+      },
+      {
+        "type": "assertion",
+        "description": "System maintains acceptable response times and no data loss"
+      },
+      {
+        "type": "action",
+        "description": "Monitor system metrics for resource usage and performance bottlenecks"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify microservice scaling triggers appropriately and system remains stable"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Secure JWT Authentication Token Expiry and Renewal",
+    "description": "Verify that JWT tokens expire after configured intervals and users must renew tokens via secure re-authentication flows.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login and capture JWT authentication token"
+      },
+      {
+        "type": "action",
+        "description": "Simulate token expiry by waiting or manipulating token timestamp"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to access protected resources with expired token"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access is denied and user is prompted to re-authenticate"
+      },
+      {
+        "type": "action",
+        "description": "Complete re-authentication and obtain a new valid token"
+      },
+      {
+        "type": "assertion",
+        "description": "Access to resources is restored after token renewal"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Audit Trail Tampering Resistance",
+    "description": "Verify that audit logs cannot be modified or deleted by unauthorized users and all changes are tracked with appropriate history.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Attempt to alter or delete audit log entries with non-administrative user"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify operation is rejected and access is denied"
+      },
+      {
+        "type": "action",
+        "description": "Login as Administrator and modify audit log (if allowed)"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm changes are logged with timestamps, user identification, and immutable history"
+      }
+    ]
+  }
+]

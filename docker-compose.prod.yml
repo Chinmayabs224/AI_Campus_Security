@@ -1,0 +1,284 @@
+version: '3.8'
+
+services:
+  # Core API Service
+  core-api:
+    build:
+      context: ./core-api
+      dockerfile: Dockerfile
+    container_name: campus-security-api
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/campus_security
+      - REDIS_URL=redis://redis:6379/0
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - ENVIRONMENT=production
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+      - minio
+    networks:
+      - campus-security
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Privacy Service
+  privacy-service:
+    build:
+      context: ./microservices/privacy-service
+      dockerfile: Dockerfile
+    container_name: campus-security-privacy
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=1
+      - FLASK_ENV=production
+    ports:
+      - "5001:5000"
+    depends_on:
+      - redis
+    networks:
+      - campus-security
+    volumes:
+      - ./logs:/app/logs
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
+  # Notification Service
+  notification-service:
+    build:
+      context: ./microservices/notification-service
+      dockerfile: Dockerfile
+    container_name: campus-security-notifications
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=2
+      - FCM_SERVER_KEY=${FCM_SERVER_KEY}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - FLASK_ENV=production
+    ports:
+      - "5002:5000"
+    depends_on:
+      - redis
+    networks:
+      - campus-security
+    volumes:
+      - ./logs:/app/logs
+
+  # Compliance Service
+  compliance-service:
+    build:
+      context: ./microservices/compliance-service
+      dockerfile: Dockerfile
+    container_name: campus-security-compliance
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/campus_security
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=3
+      - FLASK_ENV=production
+    ports:
+      - "5003:5000"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - campus-security
+    volumes:
+      - ./logs:/app/logs
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: campus-security-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - core-api
+    networks:
+      - campus-security
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api/v1
+      - REACT_APP_WS_URL=ws://localhost:8000/ws
+
+  # Edge Services (for local testing)
+  edge-service:
+    build:
+      context: ./edge-services
+      dockerfile: Dockerfile
+    container_name: campus-security-edge
+    restart: unless-stopped
+    environment:
+      - CORE_API_URL=http://core-api:8000
+      - REDIS_URL=redis://redis:6379/4
+      - GPU_ENABLED=false  # Set to true for GPU-enabled deployment
+    ports:
+      - "8080:8080"
+    depends_on:
+      - core-api
+      - redis
+    networks:
+      - campus-security
+    volumes:
+      - ./models:/app/models
+      - ./logs:/app/logs
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: campus-security-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=campus_security
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    networks:
+      - campus-security
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: campus-security-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - campus-security
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MinIO Object Storage
+  minio:
+    image: minio/minio:latest
+    container_name: campus-security-minio
+    restart: unless-stopped
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - campus-security
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: campus-security-nginx
+    restart: unless-stopped
+    ports:
+      - "443:443"
+    depends_on:
+      - frontend
+      - core-api
+    networks:
+      - campus-security
+    volumes:
+      - ./deployment/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./deployment/nginx/ssl:/etc/nginx/ssl
+      - ./logs/nginx:/var/log/nginx
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: campus-security-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    networks:
+      - campus-security
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: campus-security-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    networks:
+      - campus-security
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+
+networks:
+  campus-security:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  prometheus_data:
+  grafana_data:
